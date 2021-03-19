@@ -3,7 +3,12 @@ const app = require('express')();
 
 const FBAuth = require('./util/fbAuth');
 
-const { getAllItems, postOneItem } = require('./handlers/items');
+const {
+  getAllItems,
+  postOneItem,
+  getItem,
+  commentOnItem,
+} = require('./handlers/items');
 const {
   signup,
   login,
@@ -15,6 +20,13 @@ const {
 // Items Routes
 app.get('/items', getAllItems);
 app.post('/item', FBAuth, postOneItem);
+app.get('/item/:itemId', getItem);
+
+// TODO: delete an item
+// TODO: like an item
+// TODO: unlike an item
+
+app.post('/item/:itemId/comment', FBAuth, commentOnItem);
 
 // Users Routes
 app.post('/signup', signup);

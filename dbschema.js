@@ -20,4 +20,12 @@ let db = {
       commentCount: 2,
     },
   ],
+  comments: [
+    {
+      userHandle: 'user',
+      itemId: 'sdnksnadkksd',
+      body: 'test comment',
+      createdAt: '2020-03-15T11:46:01.018Z',
+    },
+  ],
 };
