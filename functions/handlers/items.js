@@ -29,12 +29,17 @@ exports.postOneItem = (req, res) => {
   const newItem = {
     body: req.body.body,
     userHandle: req.user.handle,
+    userImage: req.user.imageUrl,
     createdAt: new Date().toISOString(),
+    likeCount: 0,
+    commentCount: 0,
   };
   db.collection('items')
     .add(newItem)
     .then((doc) => {
-      res.json({ message: `documenent ${doc.id} created successfully` });
+      const resItem = newItem;
+      resItem.itemId = doc.id;
+      res.json(resItem);
     })
     .catch((err) => {
       res.status(500).json({ error: 'something went wrong' });
@@ -89,6 +94,9 @@ exports.commentOnItem = (req, res) => {
       if (!doc.exists) {
         return res.status(404).json({ error: 'Item not found' });
       }
+      return doc.ref.update({ commentCount: doc.data().commentCount + 1 });
+    })
+    .then(() => {
       return db.collection('comments').add(newComment);
     })
     .then(() => {
@@ -97,5 +105,119 @@ exports.commentOnItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(500).json({ error: 'Something went wrong' });
+    });
+};
+
+exports.likeItem = (req, res) => {
+  const likeDocument = db
+    .collection('likes')
+    .where('userHandle', '==', req.user.handle)
+    .where('itemId', '==', req.params.itemId)
+    .limit(1);
+
+  const itemDocument = db.doc(`/items/${req.params.itemId}`);
+
+  let itemData;
+
+  itemDocument
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        itemData = doc.data();
+        itemData.itemId = doc.id;
+        return likeDocument.get();
+      } else {
+        return res.status(404).json({ error: 'Item not found ' });
+      }
+    })
+    .then((data) => {
+      if (data.empty) {
+        return db
+          .collection('likes')
+          .add({
+            itemId: req.params.itemId,
+            userHandle: req.user.handle,
+          })
+          .then(() => {
+            itemData.likeCount++;
+            return itemDocument.update({ likeCount: itemData.likeCount });
+          })
+          .then(() => {
+            return res.json(itemData);
+          });
+      } else {
+        return res.status(400).json({ error: 'Item already liked' });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: err.code });
+    });
+};
+
+exports.unlikeItem = (req, res) => {
+  const likeDocument = db
+    .collection('likes')
+    .where('userHandle', '==', req.user.handle)
+    .where('itemId', '==', req.params.itemId)
+    .limit(1);
+
+  const itemDocument = db.doc(`/items/${req.params.itemId}`);
+
+  let itemData;
+
+  itemDocument
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        itemData = doc.data();
+        itemData.itemId = doc.id;
+        return likeDocument.get();
+      } else {
+        return res.status(404).json({ error: 'Item not found ' });
+      }
+    })
+    .then((data) => {
+      if (data.empty) {
+        return res.status(400).json({ error: 'Item not liked' });
+      } else {
+        return db
+          .doc(`/likes/${data.docs[0].id}`)
+          .delete()
+          .then(() => {
+            itemData.likeCount--;
+            return itemDocument.update({ likeCount: itemData.likeCount });
+          })
+          .then(() => {
+            res.json(itemData);
+          });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: err.code });
+    });
+};
+
+exports.deleteItem = (req, res) => {
+  const document = db.doc(`/items/${req.params.itemId}`);
+  document
+    .get()
+    .then((doc) => {
+      if (!doc.exists) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+      if (doc.data().userHandle !== req.user.handle) {
+        return res.status(403).json({ error: 'Unauthorized' });
+      } else {
+        return document.delete();
+      }
+    })
+    .then(() => {
+      res.json({ message: 'Item deleted successfully' });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: err.code });
     });
 };
