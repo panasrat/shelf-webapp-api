@@ -91,19 +91,27 @@ exports.commentOnItem = (req, res) => {
     userImage: req.user.imageUrl,
   };
 
-  db.doc(`/items/${req.params.itemId}`)
+  let commentCount = {};
+
+  const itemDocument = db.doc(`/items/${req.params.itemId}`);
+
+  itemDocument
     .get()
     .then((doc) => {
       if (!doc.exists) {
         return res.status(404).json({ error: 'Item not found' });
       }
+      commentCount = doc.data().commentCount + 1;
       return doc.ref.update({ commentCount: doc.data().commentCount + 1 });
     })
     .then(() => {
       return db.collection('comments').add(newComment);
     })
     .then(() => {
-      res.json(newComment);
+      res.json({
+        ...newComment,
+        commentCount,
+      });
     })
     .catch((err) => {
       console.error(err);
