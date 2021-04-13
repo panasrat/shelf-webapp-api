@@ -92,6 +92,7 @@ exports.commentOnItem = (req, res) => {
   };
 
   let commentCount = {};
+  let likeCount = {};
 
   const itemDocument = db.doc(`/items/${req.params.itemId}`);
 
@@ -102,6 +103,7 @@ exports.commentOnItem = (req, res) => {
         return res.status(404).json({ error: 'Item not found' });
       }
       commentCount = doc.data().commentCount + 1;
+      likeCount = doc.data().likeCount;
       return doc.ref.update({ commentCount: doc.data().commentCount + 1 });
     })
     .then(() => {
@@ -111,6 +113,7 @@ exports.commentOnItem = (req, res) => {
       res.json({
         ...newComment,
         commentCount,
+        likeCount,
       });
     })
     .catch((err) => {
