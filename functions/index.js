@@ -21,6 +21,7 @@ const {
   getAuthenticatedUser,
   getUserDetails,
   markNotificationsRead,
+  getAllUsers,
 } = require('./handlers/users');
 
 // CORS
@@ -38,6 +39,7 @@ app.post('/item/:itemId/comment', FBAuth, commentOnItem);
 // Users Routes
 app.post('/signup', signup);
 app.post('/login', login);
+app.get('/users', getAllUsers);
 app.post('/user/image', FBAuth, uploadImage);
 app.post('/user', FBAuth, addUserDetails);
 app.get('/user', FBAuth, getAuthenticatedUser);

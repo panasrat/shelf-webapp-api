@@ -97,6 +97,31 @@ exports.login = (req, res) => {
     });
 };
 
+exports.getAllUsers = (req, res) => {
+  db.collection('users')
+    .orderBy('createdAt', 'desc')
+    .get()
+    .then((data) => {
+      let users = [];
+      data.forEach((doc) => {
+        users.push({
+          userId: doc.data().userId,
+          bio: doc.data().bio,
+          handle: doc.data().handle,
+          createdAt: doc.data().createdAt,
+          email: doc.data().email,
+          imageUrl: doc.data().imageUrl,
+          location: doc.data().location,
+          website: doc.data().website,
+        });
+      });
+      return res.json(users);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
 exports.addUserDetails = (req, res) => {
   let userDetails = reduceUserDetails(req.body);
 
