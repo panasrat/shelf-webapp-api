@@ -7,6 +7,7 @@ const cors = require('cors');
 const {
   getAllItems,
   postOneItem,
+  createOneShelf,
   getItem,
   commentOnItem,
   likeItem,
@@ -30,6 +31,7 @@ app.use(cors());
 // Items Routes
 app.get('/items', getAllItems);
 app.post('/item', FBAuth, postOneItem);
+app.post('/shelf', FBAuth, createOneShelf);
 app.get('/item/:itemId', getItem);
 app.delete('/item/:itemId', FBAuth, deleteItem);
 app.get('/item/:itemId/like', FBAuth, likeItem);

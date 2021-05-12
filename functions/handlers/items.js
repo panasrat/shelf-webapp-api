@@ -31,6 +31,7 @@ exports.postOneItem = (req, res) => {
 
   const newItem = {
     body: req.body.body,
+    shelfId: req.body.shelfId,
     userHandle: req.user.handle,
     userImage: req.user.imageUrl,
     createdAt: new Date().toISOString(),
@@ -43,6 +44,30 @@ exports.postOneItem = (req, res) => {
       const resItem = newItem;
       resItem.itemId = doc.id;
       res.json(resItem);
+    })
+    .catch((err) => {
+      res.status(500).json({ error: 'something went wrong' });
+      console.error(err);
+    });
+};
+
+exports.createOneShelf = (req, res) => {
+  if (req.body.body.trim() === '') {
+    return res.status(400).json({ body: 'Body must not be empty' });
+  }
+
+  const newShelf = {
+    shelfName: req.body.body,
+    userHandle: req.user.handle,
+    userImage: req.user.imageUrl,
+    createdAt: new Date().toISOString(),
+  };
+  db.collection('shelves')
+    .add(newShelf)
+    .then((doc) => {
+      const resShelf = newShelf;
+      resShelf.shlefId = doc.id;
+      res.json(resShelf);
     })
     .catch((err) => {
       res.status(500).json({ error: 'something went wrong' });
@@ -141,7 +166,7 @@ exports.likeItem = (req, res) => {
         itemData.itemId = doc.id;
         return likeDocument.get();
       } else {
-        return res.status(404).json({ error: 'Item not found ' });
+        return res.status(404).json({ error: 'Item not found' });
       }
     })
     .then((data) => {
