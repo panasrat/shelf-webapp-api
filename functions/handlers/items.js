@@ -11,6 +11,7 @@ exports.getAllItems = (req, res) => {
           itemId: doc.id,
           body: doc.data().body,
           shelfId: doc.data().shelfId,
+          shelfName: doc.data().shelfName,
           userHandle: doc.data().userHandle,
           createdAt: doc.data().createdAt,
           commentCount: doc.data().commentCount,
@@ -33,6 +34,7 @@ exports.postOneItem = (req, res) => {
   const newItem = {
     body: req.body.body,
     shelfId: req.body.shelfId,
+    shelfName: req.body.shelfName,
     userHandle: req.user.handle,
     userImage: req.user.imageUrl,
     createdAt: new Date().toISOString(),
@@ -67,7 +69,7 @@ exports.createOneShelf = (req, res) => {
     .add(newShelf)
     .then((doc) => {
       const resShelf = newShelf;
-      resShelf.shlefId = doc.id;
+      resShelf.shelfId = doc.id;
       res.json(resShelf);
     })
     .catch((err) => {
@@ -104,6 +106,48 @@ exports.getItem = (req, res) => {
       res.status(500).json({ error: err.code });
     });
 };
+
+exports.getShelf = (req, res) => {
+  let shelfData = {};
+  db.doc(`/shelves/${req.params.shelfId}`)
+    .get()
+    .then((doc) => {
+      if (!doc.exists) {
+        return res.status(404).json({ error: 'Shelf not found' });
+      }
+      shelfData = doc.data();
+      shelfData.shelfId = doc.id;
+      return db
+        .collection('items')
+        .orderBy('createdAt', 'desc')
+        .where('shelfId', '==', req.params.shelfId)
+        .get();
+    })
+    .then((data) => {
+      shelfData.items = [];
+      data.forEach((doc) => {
+        shelfData.items.push(doc.data());
+      });
+      return res.json(shelfData);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: err.code });
+    });
+};
+
+// exports.getShelfName = (req, res) => {
+//   let shelfName = '';
+//   db.doc(`/shelves/${req.params.shelfId}`)
+//     .get()
+//     .then((doc) => {
+//       if (!doc.exists) {
+//         return res.status(404).json({ error: 'Shelf not found' });
+//       }
+//       shelfName = doc.data().shelfName;
+//       return res.json(shelfName);
+//     });
+// };
 
 exports.commentOnItem = (req, res) => {
   if (req.body.body.trim() === '')

@@ -8,6 +8,8 @@ const {
   getAllItems,
   postOneItem,
   createOneShelf,
+  getShelf,
+  getShelfName,
   getItem,
   commentOnItem,
   likeItem,
@@ -32,6 +34,7 @@ app.use(cors());
 app.get('/items', getAllItems);
 app.post('/item', FBAuth, postOneItem);
 app.post('/shelf', FBAuth, createOneShelf);
+app.get('/shelf/:shelfId', getShelf);
 app.get('/item/:itemId', getItem);
 app.delete('/item/:itemId', FBAuth, deleteItem);
 app.get('/item/:itemId/like', FBAuth, likeItem);

@@ -160,6 +160,7 @@ exports.getUserDetails = (req, res) => {
         userData.items.push({
           body: doc.data().body,
           shelfId: doc.data().shelfId,
+          shelfName: doc.data().shelfName,
           createdAt: doc.data().createdAt,
           userHandle: doc.data().userHandle,
           userImage: doc.data().userImage,
