@@ -233,6 +233,23 @@ exports.getAuthenticatedUser = (req, res) => {
           notificationId: doc.id,
         });
       });
+      return db
+        .collection('shelves')
+        .where('userHandle', '==', req.user.handle)
+        .orderBy('createdAt', 'desc')
+        .get();
+    })
+    .then((data) => {
+      userData.shelves = [];
+      data.forEach((doc) => {
+        userData.shelves.push({
+          shelfName: doc.data().shelfName,
+          createdAt: doc.data().createdAt,
+          userHandle: doc.data().userHandle,
+          userImage: doc.data().userImage,
+          shelfId: doc.id,
+        });
+      });
       return res.json(userData);
     })
     .catch((err) => {
