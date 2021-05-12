@@ -159,6 +159,7 @@ exports.getUserDetails = (req, res) => {
       data.forEach((doc) => {
         userData.items.push({
           body: doc.data().body,
+          shelfId: doc.data().shelfId,
           createdAt: doc.data().createdAt,
           userHandle: doc.data().userHandle,
           userImage: doc.data().userImage,

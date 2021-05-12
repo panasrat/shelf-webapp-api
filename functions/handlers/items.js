@@ -10,6 +10,7 @@ exports.getAllItems = (req, res) => {
         items.push({
           itemId: doc.id,
           body: doc.data().body,
+          shelfId: doc.data().shelfId,
           userHandle: doc.data().userHandle,
           createdAt: doc.data().createdAt,
           commentCount: doc.data().commentCount,
